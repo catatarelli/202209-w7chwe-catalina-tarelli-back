@@ -6,10 +6,11 @@ import {
   userMock,
   userMockCredentials,
   userMockWithId,
+  usersListMock,
 } from "../../../mocks/userMocks.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { loginUser, registerUser } from "./usersControllers.js";
+import { getUsers, loginUser, registerUser } from "./usersControllers.js";
 import type { NextFunction, Request, Response } from "express";
 
 beforeEach(() => {
@@ -106,6 +107,49 @@ describe("Given a registerUser Controller", () => {
       await registerUser(req as Request, res as Response, next as NextFunction);
 
       expect(next).toHaveBeenCalled();
+    });
+  });
+});
+
+describe("Given a getUsers Controller", () => {
+  describe("When it finds a list of users", () => {
+    test("Then it should call the response method status with a 200, and the json method", async () => {
+      const expectedStatus = 200;
+
+      User.find = jest.fn().mockReturnValue(usersListMock);
+
+      await getUsers(null, res as Response, null);
+
+      expect(res.status).toHaveBeenCalledWith(expectedStatus);
+      expect(res.json).toHaveBeenCalled();
+    });
+  });
+
+  describe("When it receives an empty array", () => {
+    test("Then it should call the response method status with a 404", async () => {
+      const expectedStatus = 404;
+
+      User.find = jest.fn().mockReturnValue([]);
+
+      await getUsers(null, res as Response, null);
+
+      expect(res.status).toHaveBeenCalledWith(expectedStatus);
+    });
+  });
+
+  describe("When it receives a response with an error", () => {
+    test("Then next should be called", async () => {
+      const customError = new CustomError(
+        "",
+        500,
+        "Database doesn't work, try again later"
+      );
+
+      User.find = jest.fn().mockRejectedValue(Error(""));
+
+      await getUsers(null, res as Response, next as NextFunction);
+
+      expect(next).toHaveBeenCalledWith(customError);
     });
   });
 });
