@@ -65,3 +65,27 @@ export const registerUser = async (
     next(customError);
   }
 };
+
+export const getUsers = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const users = await User.find();
+
+    if (!users?.length) {
+      res.status(404).json({ message: "No users found." });
+      return;
+    }
+
+    res.status(200).json({ users });
+  } catch (error: unknown) {
+    const customError = new CustomError(
+      (error as Error).message,
+      500,
+      "Database doesn't work, try again later"
+    );
+    next(customError);
+  }
+};

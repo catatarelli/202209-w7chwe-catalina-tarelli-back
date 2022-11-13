@@ -17,3 +17,16 @@ export const userMockCredentials = {
   email: "paquito@gmail.com",
   id: "ñasokdfjdsñlk",
 };
+
+export const usersListMock = [
+  {
+    username: "paquito",
+    password: "paquito123",
+    email: "paquito@gmail.com",
+  },
+  {
+    username: "pepito",
+    password: "pepito123",
+    email: "pepito@gmail.com",
+  },
+];

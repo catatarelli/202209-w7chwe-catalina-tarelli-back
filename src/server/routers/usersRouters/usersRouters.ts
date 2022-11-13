@@ -1,6 +1,7 @@
 import express from "express";
 import { validate } from "express-validation";
 import {
+  getUsers,
   loginUser,
   registerUser,
 } from "../../controllers/usersControllers/usersControllers.js";
@@ -15,5 +16,6 @@ usersRouter.post(
   registerUser
 );
 usersRouter.post("/login", loginUser);
+usersRouter.get("/", getUsers);
 
 export default usersRouter;
