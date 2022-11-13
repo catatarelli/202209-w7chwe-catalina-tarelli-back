@@ -94,6 +94,7 @@ describe("Given a registerUser Controller", () => {
       User.create = jest
         .fn()
         .mockReturnValue({ ...userMockCredentials, password: hashedPassword });
+
       await registerUser(req as Request, res as Response, null);
 
       expect(res.status).toHaveBeenCalledWith(expectedStatus);

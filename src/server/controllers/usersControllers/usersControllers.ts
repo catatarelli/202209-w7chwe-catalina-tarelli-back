@@ -1,4 +1,7 @@
 import bcrypt from "bcryptjs";
+import { createClient } from "@supabase/supabase-js";
+import fs from "fs/promises";
+import path from "path";
 import CustomError from "../../../CustomError/CustomError.js";
 import type {
   RegisterData,
@@ -6,9 +9,16 @@ import type {
   UserTokenPayload,
 } from "../../../types/types";
 import User from "../../../database/models/User.js";
-import { secretWord } from "../../../loadEnvironments.js";
+import {
+  secretWord,
+  supabaseUrl,
+  supabaseKey,
+  supabaseBucketId,
+} from "../../../loadEnvironments.js";
 import jwt from "jsonwebtoken";
 import type { NextFunction, Response, Request } from "express";
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export const loginUser = async (
   req: Request,
@@ -49,13 +59,52 @@ export const registerUser = async (
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = await User.create({
-      username,
-      password: hashedPassword,
-      email,
-    });
+    if (req.file) {
+      const timeStamp = Date.now();
 
-    res.status(201).json({ user: { id: newUser._id, username, email } });
+      const newFilePath = `${path.basename(
+        req.file.originalname,
+        path.extname(req.file.originalname)
+      )}-${timeStamp}${path.extname(req.file.originalname)}`;
+
+      await fs.rename(
+        path.join("assets", "images", req.file.filename),
+        path.join("assets", "images", newFilePath)
+      );
+
+      const bucket = supabase.storage.from(supabaseBucketId);
+      const itemFileContents = await fs.readFile(
+        path.join("assets", "images", newFilePath)
+      );
+
+      await bucket.upload(newFilePath, itemFileContents);
+      const {
+        data: { publicUrl },
+      } = bucket.getPublicUrl(newFilePath);
+
+      const newUser = await User.create({
+        username,
+        password: hashedPassword,
+        email,
+        picture: newFilePath,
+        backupPicure: publicUrl,
+      });
+
+      res.status(201).json({
+        ...newUser.toJSON(),
+        picture: path
+          .join("assets", "images", newFilePath)
+          .replaceAll("\\", "/"),
+      });
+    } else {
+      const newUser = await User.create({
+        username,
+        password: hashedPassword,
+        email,
+      });
+
+      res.status(201).json({ user: { id: newUser._id, username, email } });
+    }
   } catch (error: unknown) {
     const customError = new CustomError(
       (error as Error).message,
