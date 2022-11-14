@@ -1,4 +1,6 @@
 import "../../../loadEnvironments.js";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 import CustomError from "../../../CustomError/CustomError.js";
 import User from "../../../database/models/User.js";
 import { secretWord } from "../../../loadEnvironments.js";
@@ -8,10 +10,9 @@ import {
   userMockWithId,
   usersListMock,
 } from "../../../mocks/userMocks.js";
-import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
 import { getUsers, loginUser, registerUser } from "./usersControllers.js";
 import type { NextFunction, Request, Response } from "express";
+import type { CustomRequest } from "../../../types/types.js";
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -24,11 +25,11 @@ const res: Partial<Response> = {
 
 const next = jest.fn();
 
-describe("Given a loginUser Controller", () => {
-  const req: Partial<Request> = {
-    body: userMock,
-  };
+const req: Partial<Request> = {
+  body: userMock,
+};
 
+describe("Given a loginUser Controller", () => {
   const newCustomError = new CustomError(
     "Wrong credentials",
     401,
@@ -119,7 +120,7 @@ describe("Given a getUsers Controller", () => {
 
       User.find = jest.fn().mockReturnValue(usersListMock);
 
-      await getUsers(null, res as Response, null);
+      await getUsers(req as CustomRequest, res as Response, null);
 
       expect(res.status).toHaveBeenCalledWith(expectedStatus);
       expect(res.json).toHaveBeenCalled();
@@ -132,7 +133,7 @@ describe("Given a getUsers Controller", () => {
 
       User.find = jest.fn().mockReturnValue([]);
 
-      await getUsers(null, res as Response, null);
+      await getUsers(req as CustomRequest, res as Response, null);
 
       expect(res.status).toHaveBeenCalledWith(expectedStatus);
     });
@@ -148,7 +149,11 @@ describe("Given a getUsers Controller", () => {
 
       User.find = jest.fn().mockRejectedValue(Error(""));
 
-      await getUsers(null, res as Response, next as NextFunction);
+      await getUsers(
+        req as CustomRequest,
+        res as Response,
+        next as NextFunction
+      );
 
       expect(next).toHaveBeenCalledWith(customError);
     });
