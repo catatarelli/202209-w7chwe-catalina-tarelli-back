@@ -4,6 +4,7 @@ import fs from "fs/promises";
 import path from "path";
 import CustomError from "../../../CustomError/CustomError.js";
 import type {
+  CustomRequest,
   RegisterData,
   UserCredentials,
   UserTokenPayload,
@@ -116,12 +117,15 @@ export const registerUser = async (
 };
 
 export const getUsers = async (
-  req: Request,
+  req: CustomRequest,
   res: Response,
   next: NextFunction
 ) => {
+  const { userId } = req;
   try {
-    const users = await User.find();
+    const users = await User.find({
+      _id: { $ne: userId },
+    });
 
     if (!users?.length) {
       res.status(404).json({ message: "No users found." });

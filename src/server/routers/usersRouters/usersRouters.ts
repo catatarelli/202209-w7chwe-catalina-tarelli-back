@@ -7,6 +7,7 @@ import {
   loginUser,
   registerUser,
 } from "../../controllers/usersControllers/usersControllers.js";
+import { auth } from "../../middlewares/auth/auth.js";
 import userRegisterSchema from "../../schema/userRegisterDataSchema.js";
 
 const upload = multer({
@@ -23,6 +24,6 @@ usersRouter.post(
   registerUser
 );
 usersRouter.post("/login", loginUser);
-usersRouter.get("/", getUsers);
+usersRouter.get("/", auth, getUsers);
 
 export default usersRouter;
