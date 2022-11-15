@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { createClient } from "@supabase/supabase-js";
 import fs from "fs/promises";
 import path from "path";
+import jwt from "jsonwebtoken";
 import CustomError from "../../../CustomError/CustomError.js";
 import type {
   CustomRequest,
@@ -16,7 +17,6 @@ import {
   supabaseKey,
   supabaseBucketId,
 } from "../../../loadEnvironments.js";
-import jwt from "jsonwebtoken";
 import type { NextFunction, Response, Request } from "express";
 
 const supabase = createClient(supabaseUrl, supabaseKey);
