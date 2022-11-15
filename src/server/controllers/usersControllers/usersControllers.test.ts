@@ -42,7 +42,7 @@ describe("Given a loginUser Controller", () => {
 
       const token = jwt.sign(userMockWithId, secretWord);
 
-      User.findOne = jest.fn().mockReturnValue(userMockWithId);
+      User.findOne = jest.fn().mockResolvedValue(userMockWithId);
       bcrypt.compare = jest.fn().mockResolvedValueOnce(true);
       jwt.sign = jest.fn().mockReturnValueOnce(token);
 
@@ -55,7 +55,7 @@ describe("Given a loginUser Controller", () => {
 
   describe("When it receives username 'pepito' that is not in the database", () => {
     test("Then it should call next with a Custom Error with public message 'Wrong credentials' and response status 401", async () => {
-      User.findOne = jest.fn().mockReturnValue({});
+      User.findOne = jest.fn().mockResolvedValue({});
 
       await loginUser(req as Request, res as Response, next as NextFunction);
 
@@ -65,7 +65,7 @@ describe("Given a loginUser Controller", () => {
 
   describe("When it receives a request with an empty body", () => {
     test("Then it should call next with a Custom Error with public message 'Wrong credentials' and response status 401", async () => {
-      User.findOne = jest.fn().mockReturnValue(null);
+      User.findOne = jest.fn().mockResolvedValue(null);
 
       const req: Partial<Request> = {
         body: {},
@@ -92,9 +92,10 @@ describe("Given a registerUser Controller", () => {
         10
       );
 
-      User.create = jest
-        .fn()
-        .mockReturnValue({ ...userMockCredentials, password: hashedPassword });
+      User.create = jest.fn().mockResolvedValue({
+        ...userMockCredentials,
+        password: hashedPassword,
+      });
 
       await registerUser(req as Request, res as Response, null);
 
@@ -118,7 +119,9 @@ describe("Given a getUsers Controller", () => {
     test("Then it should call the response method status with a 200, and the json method", async () => {
       const expectedStatus = 200;
 
-      User.find = jest.fn().mockReturnValue(usersListMock);
+      User.find = jest.fn().mockReturnValue({
+        select: jest.fn().mockReturnValue(usersListMock),
+      });
 
       await getUsers(req as CustomRequest, res as Response, null);
 
@@ -131,7 +134,9 @@ describe("Given a getUsers Controller", () => {
     test("Then it should call the response method status with a 404", async () => {
       const expectedStatus = 404;
 
-      User.find = jest.fn().mockReturnValue([]);
+      User.find = jest.fn().mockReturnValue({
+        select: jest.fn().mockReturnValue([]),
+      });
 
       await getUsers(req as CustomRequest, res as Response, null);
 
@@ -146,8 +151,10 @@ describe("Given a getUsers Controller", () => {
         500,
         "Database doesn't work, try again later"
       );
-
-      User.find = jest.fn().mockRejectedValue(Error(""));
+      const error = new Error();
+      User.find = jest.fn().mockReturnValue({
+        select: jest.fn().mockRejectedValue(error),
+      });
 
       await getUsers(
         req as CustomRequest,

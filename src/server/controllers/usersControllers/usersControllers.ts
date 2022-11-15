@@ -92,7 +92,9 @@ export const registerUser = async (
       });
 
       res.status(201).json({
-        ...newUser.toJSON(),
+        id: newUser._id,
+        username: newUser.username,
+        email: newUser.email,
         picture: path
           .join("assets", "images", newFilePath)
           .replaceAll("\\", "/"),
@@ -125,7 +127,7 @@ export const getUsers = async (
   try {
     const users = await User.find({
       _id: { $ne: userId },
-    });
+    }).select("-password");
 
     if (!users?.length) {
       res.status(404).json({ message: "No users found." });
