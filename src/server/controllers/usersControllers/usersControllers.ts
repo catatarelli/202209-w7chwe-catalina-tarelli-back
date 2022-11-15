@@ -95,7 +95,7 @@ export const registerUser = async (
         id: newUser._id,
         username: newUser.username,
         email: newUser.email,
-        picture: path.join("assets", "images", newFilePath),
+        picture: newFilePath,
       });
     } else {
       const newUser = await User.create({
