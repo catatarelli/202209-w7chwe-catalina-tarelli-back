@@ -6,6 +6,8 @@ import {
   getUsers,
   loginUser,
   registerUser,
+  setRelationship,
+  updateRelationShip,
 } from "../../controllers/usersControllers/usersControllers.js";
 import { auth } from "../../middlewares/auth/auth.js";
 import userRegisterSchema from "../../schema/userRegisterDataSchema.js";
@@ -25,5 +27,7 @@ usersRouter.post(
 );
 usersRouter.post("/login", loginUser);
 usersRouter.get("/", auth, getUsers);
+
+usersRouter.post("/relationship", auth, setRelationship, updateRelationShip);
 
 export default usersRouter;

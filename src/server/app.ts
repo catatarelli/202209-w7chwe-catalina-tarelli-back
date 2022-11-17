@@ -10,6 +10,7 @@ app.use(cors());
 app.disable("x-powered-by");
 
 app.use(morgan("dev"));
+app.use(express.static("/assets"));
 
 app.use(express.json());
 
