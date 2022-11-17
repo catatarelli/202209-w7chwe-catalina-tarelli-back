@@ -2,6 +2,19 @@ import type { InferSchemaType } from "mongoose";
 import { model, Schema } from "mongoose";
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
+const RelationshipSchema = new Schema({
+  userToRelateId: {
+    type: String,
+    required: true,
+  },
+  relationshipType: {
+    type: String,
+    required: true,
+    default: "stranger",
+  },
+});
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const UserSchema = new Schema({
   username: {
     type: String,
@@ -24,6 +37,7 @@ const UserSchema = new Schema({
   backupPicure: {
     type: String,
   },
+  relationships: [RelationshipSchema],
 });
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
