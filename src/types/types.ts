@@ -11,7 +11,7 @@ export interface UserCredentials {
 
 export interface RegisterData extends UserCredentials {
   email: string;
-  picture: string;
+  picture?: string;
 }
 
 export interface UserTokenPayload extends JwtPayload {
@@ -21,4 +21,9 @@ export interface UserTokenPayload extends JwtPayload {
 
 export interface CustomRequest extends Request {
   userId: string;
+}
+
+export interface RelationshipData {
+  userToRelateId: string;
+  relationshipType: string;
 }
