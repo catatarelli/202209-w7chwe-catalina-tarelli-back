@@ -7,6 +7,7 @@ import CustomError from "../../../CustomError/CustomError.js";
 import type {
   CustomRequest,
   RegisterData,
+  RelationshipData,
   UserCredentials,
   UserTokenPayload,
 } from "../../../types/types";
@@ -140,5 +141,74 @@ export const getUsers = async (
       "Database doesn't work, try again later"
     );
     next(customError);
+  }
+};
+
+export const setRelationship = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  const { userId } = req;
+  const { userToRelateId, relationshipType } = req.body as RelationshipData;
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      next(new CustomError("User not found", 404, "User not found"));
+      return;
+    }
+
+    const relationshipOfUser = user.relationships.find(
+      (relationship) => relationship.userToRelateId === userToRelateId
+    );
+
+    if (relationshipOfUser) {
+      next();
+      return;
+    }
+
+    const relationship: RelationshipData = {
+      userToRelateId,
+      relationshipType,
+    };
+
+    user.relationships.push(relationship);
+
+    await user.save();
+
+    res.status(200).json({ relationship });
+  } catch (error: unknown) {
+    next(error as Error);
+  }
+};
+
+export const updateRelationShip = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  const { userId } = req;
+  const { userToRelateId, relationshipType } = req.body as RelationshipData;
+
+  try {
+    const user = await User.findById(userId);
+
+    const relationshipOfUser = user.relationships.find(
+      (relationship) => relationship.userToRelateId === userToRelateId
+    );
+
+    const relationship: RelationshipData = {
+      userToRelateId,
+      relationshipType,
+    };
+
+    relationshipOfUser.relationshipType = relationshipType;
+
+    await user.save();
+
+    res.status(200).json({ relationship });
+  } catch (error: unknown) {
+    next(error as Error);
   }
 };
